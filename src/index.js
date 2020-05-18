@@ -2,16 +2,7 @@ const net = require('net');
 const Packet = require('./Structure/Packet');
 const Response = require('./Structure/Response');
 
-const ping = (host, port = 25565, options, callback) => {
-	if (typeof port === 'function') {
-		callback = port;
-		port = 25565;
-		options = {};
-	} else if (typeof options === 'function') {
-		callback = options;
-		options = {};
-	}
-
+const ping = (host, port = 25565, options) => {
 	options = Object.assign({
 		protocolVersion: 47,
 		connectTimeout: 1000 * 5
@@ -21,7 +12,7 @@ const ping = (host, port = 25565, options, callback) => {
 	if (typeof port !== 'number') throw new TypeError('Port must be a number');
 	if (typeof options !== 'object') throw new TypeError('Options must be an object');
 
-	const resultPromise = new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		let isResolved = false;
 
 		const readingPacket = new Packet();
@@ -115,14 +106,6 @@ const ping = (host, port = 25565, options, callback) => {
 			reject(new Error('Socket closed unexpectedly'));
 		});
 	});
-
-	if (callback) {
-		resultPromise
-			.then((...args) => callback(null, ...args))
-			.catch((error) => callback(error, null));
-	} else {
-		return resultPromise;
-	}
 };
 
 module.exports.Packet = Packet;
