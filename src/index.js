@@ -3,16 +3,7 @@ const dns = require('dns');
 const Packet = require('./Structure/Packet');
 const Response = require('./Structure/Response');
 
-const ping = (host, port = 25565, options, callback) => {
-	if (typeof port === 'function') {
-		callback = port;
-		port = 25565;
-		options = {};
-	} else if (typeof options === 'function') {
-		callback = options;
-		options = {};
-	}
-
+const ping = (host, port = 25565, options) => {
 	options = Object.assign({
 		protocolVersion: 47,
 		connectTimeout: 1000 * 5,
@@ -23,7 +14,7 @@ const ping = (host, port = 25565, options, callback) => {
 	if (typeof port !== 'number') throw new TypeError('Port must be a number');
 	if (typeof options !== 'object') throw new TypeError('Options must be an object');
 
-	const resultPromise = new Promise(async (resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		if (options.enableSRV && isNaN(Number(host.split('.').pop())))
 			({ host, port } = await new Promise((resolve, reject) => {
 				dns.resolveSrv(`_minecraft._tcp.${host}`, (err, address) => {
@@ -131,14 +122,6 @@ const ping = (host, port = 25565, options, callback) => {
 			reject(new Error('Socket closed unexpectedly'));
 		});
 	});
-
-	if (callback) {
-		resultPromise
-			.then((...args) => callback(null, ...args))
-			.catch((error) => callback(error, null));
-	} else {
-		return resultPromise;
-	}
 };
 
 module.exports.Packet = Packet;
